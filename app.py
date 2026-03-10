@@ -1,28 +1,21 @@
 import streamlit as st
+from audiorecorder import audiorecorder
 from openai import OpenAI
 
-st.set_page_config(page_title="POWERFULL STT", page_icon="🎙️")
-st.title("🎙️ POWERFULL SPEECH TO TEXT")
+st.title("🎙️ లైవ్ స్పీచ్ టు టెక్స్ట్")
 
-# మీ API Key ఇక్కడ సెట్ చేయబడింది
-client = OpenAI(api_key="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")
+# మీ OpenAI API కీని ఇక్కడ ఇవ్వండి
+client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
 
-audio_file = st.file_uploader("ఆడియో ఫైల్‌ను అప్‌లోడ్ చేయండి", type=['mp3', 'wav', 'm4a'])
+# ఆడియో రికార్డర్
+audio = audiorecorder("రికార్డింగ్ మొదలుపెట్టండి", "రికార్డింగ్ ఆపండి")
 
-if st.button("టెక్స్ట్‌గా మార్చండి"):
-    if audio_file:
-        with st.spinner('AI మీ మాటలను అర్థం చేసుకుంటోంది...'):
-            try:
-                # Whisper AI మోడల్ ఉపయోగించి ఆడియోను టెక్స్ట్ గా మారుస్తున్నాము
-                transcript = client.audio.transcriptions.create(
-                    model="whisper-1", 
-                    file=audio_file
-                )
-                st.success("పూర్తయింది!")
-                st.subheader("రిజల్ట్:")
-                st.write(transcript.text)
-            except Exception as e:
-                st.error(f"Error: {e}")
-    else:
-        st.warning("ముందుగా ఒక ఆడియో ఫైల్‌ని ఎంచుకోండి.")
-      
+if len(audio) > 0:
+    audio.export("audio.mp3", format="mp3")
+    audio_file = open("audio.mp3", "rb")
+    
+    with st.spinner('ట్రాన్స్‌క్రిప్షన్ జరుగుతోంది...'):
+        transcript = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
+        st.subheader("మీరు అన్న మాటలు:")
+        st.write(transcript.text)
+        
